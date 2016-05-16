@@ -1,0 +1,38 @@
+php:
+  build: .
+  container_name: evista-php
+  dockerfile: dockerfiles/Dockerfile.php-fpm
+  volumes:
+    - .:/var/www/html
+    - dockerfiles/php-fpm/php.ini:/usr/local/etc/php/php.ini
+  environment:
+    APP_DEBUG: "true"
+    APP_ENV: "local"
+    APP_KEY: "<app_key>"
+    DB_HOST: "db"
+    DB_DATABASE: "app"
+    DB_USERNAME: "root"
+    DB_PASSWORD: ""
+  links:
+    - mysql:db
+
+web:
+  container_name: evista-nginx
+  build: .
+  dockerfile: dockerfiles/Dockerfile.nginx
+  links:
+    - php:fpm
+    - mysql:db
+  ports:
+    - 80:80
+  volumes:
+    - .:/var/www/html
+
+mysql:
+  container_name: evista-mysql
+  image: mysql:5
+  environment:
+    MYSQL_ALLOW_EMPTY_PASSWORD: "true"
+    MYSQL_DATABASE: "app"
+  ports:
+    - 33061:3306
